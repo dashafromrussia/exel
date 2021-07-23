@@ -1,3 +1,6 @@
 .idea
+<<<<<<< HEAD
 node modules
+=======
+>>>>>>> 091a47da3a00bd1cf8e7a68022b80ed3dc5e6064
 node_modules
