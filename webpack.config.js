@@ -54,7 +54,7 @@ module.exports =(env, argv)=>{
       port: '3000',
     // open:true, //браузер будет открыв автоматом// watchContentBase:true,
     // для автоматич перезагрузки ,когда сделаны изменения
-    // hot:true //но не обновл штмл..все остальное обновляется
+    // hot: true // но не обновл штмл..все остальное обновляется
     },
     plugins: plugins(),
     devtool: isDev ? 'source-map':false,

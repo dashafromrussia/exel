@@ -1,6 +1,6 @@
 import './scss/index.scss'
 import 'core-js/stable'
-// исп вместо полифилла,чтобы работать с новыми встроенными модулями
+// исп вместо полифилла babel,чтобы работать с новыми встроенными модулями
 import 'regenerator-runtime/runtime'
 import './module'
 console.log('hello!')
