@@ -1,3 +1,5 @@
+import {$} from '../../core/dom'
+
 /* eslint-disable max-len */
 const CODES = {
     A: 65,
@@ -13,15 +15,20 @@ const CODES = {
 
   function toColumn(col) {
     return `
-      <div class="column">${col}</div>
+      <div class="column" data-column='col' data-col =${col}>${col}
+      <div class = "col-resize" data-resize="col"></div>
+      </div>
     `
   }
 
   function createRow(content, count) {
       count = !count ? '' : count
+      const resize = count ? '<div class="row-resize" data-resize="row"></div>':''
     return `
-      <div class="row">
-        <div class="row-info">${count}</div>
+      <div class="row" data-type="resize">
+        <div class="row-info" data-info="info">${count}
+        ${resize}
+        </div>
         <div class="row-data">${content}</div>
       </div>
     `
@@ -43,38 +50,74 @@ export function createTable(rowsCount = 15) {
 
     rows.push(createRow(cols))
 
-    /* const cells = new Array(colsCount).fill('').map(toChar) // со значениями в ячейках
+     const cells = new Array(colsCount).fill('').map(toChar) // со значениями в ячейках
 
     for (let i = 0; i < rowsCount; i++) {
         const newcells = cells.map((elem)=>{
-           return `<div class="cell" contenteditable>${elem}${i+1}</div>`
+           return `<div class="cell" contenteditable data-cell=${elem}>${elem}${i+1}</div>`
         }).join('')
       rows.push(createRow(newcells, i+1))
-    }*/
+    }
 
-    for (let i = 0; i < rowsCount; i++) {
+    /* for (let i = 0; i < rowsCount; i++) {
       const cells = new Array(colsCount).fill('').map(toChar).map(createCell).join('')
       rows.push(createRow(cells, i+1))
-    }
+    } */
 
     return rows.join('')
   }
 
-/* <div class="excel__table">
-          <div class="row">
-            <div class="row-info"></div>
-            <div class="row-data">
-              <div class="column">a</div>
-              <div class="column">b</div>
-              <div class="column">c</div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="row-info">1</div>
-            <div class="row-data">
-              <div class="cell selected" contenteditable></div>
-              <div class="cell" contenteditable></div>
-              <div class="cell" contenteditable></div>
-            </div>
-          </div>
-      </div> */
+  export function resizeTable(event, $root) {
+    document.onselectstart=()=>{ // убирает выделение содержимого таблицы при ресайзе
+      return false
+    }
+    console.log(event.target, 'mouseDown') // {resize: "row"} если нажимаем на элемент с датой data-resize = 'row'
+const $resizer = $(event.target)
+if (event.target.dataset.resize ==='row') {
+    const $parent = $resizer.closest('[data-type="resize"]')
+    const coords = $parent.getCoords()
+    const $parentInfo =$resizer.closest('[data-info="info"]')
+    const $line = $.create('div', 'line-rowresize')
+    let height
+    $parentInfo.append($line)
+    $line.css({display: 'block', width: document.documentElement.clientWidth +'px'})
+    document.onmousemove = (e) =>{
+        const delta = e.pageY - coords.bottom
+        height = coords.height + delta + 'px'
+        const change = -delta
+        $line.css({bottom: change + 'px'})
+       // $parent.styles.height = coords.height + delta + 'px'
+    }
+    document.onmouseup=()=>{
+        document.onmousemove = null
+        $parent.css({height: height})
+        $parentInfo.removeEl($line)
+    }
+}
+if (event.target.dataset.resize ==='col') {
+const $parent = $resizer.closest('[data-column="col"]')
+const coords = $parent.getCoords()
+const $line = $.create('div', 'line-resize')
+$parent.append($line)
+let widthcol
+document.onmousemove = (e) =>{
+    const delta = e.pageX - coords.right
+    widthcol = coords.width + delta
+    // $parent.styles.width = widthcol + 'px'
+    $parent.css({width: widthcol + 'px'})
+    $line.css({display: 'block', height: document.documentElement.clientHeight +'px'})
+}
+document.onmouseup=()=>{
+    document.onmousemove = null
+   // document.onmouseup = null
+   // const cells = document.querySelectorAll(`[data-cell=${$parent.$el.getAttribute('data-col')}]`)
+   const cells = $root.findAll(`[data-cell=${$parent.data.col}]`)
+    cells.forEach((el) =>{
+            //  el.style.width = widthcol + 'px'
+            el.css({width: widthcol + 'px'})
+      })
+    $parent.removeEl($line)
+    console.log(document.onmousemove)
+  }
+}
+}
