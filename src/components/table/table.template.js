@@ -54,7 +54,7 @@ export function createTable(rowsCount = 15) {
 
     for (let i = 0; i < rowsCount; i++) {
         const newcells = cells.map((elem)=>{
-           return `<div class="cell" contenteditable data-cell=${elem}>${elem}${i+1}</div>`
+           return `<div class="cell" contenteditable data-sel="select" data-num=${i+1} data-name=${elem}${i+1} data-cell=${elem}></div>`
         }).join('')
       rows.push(createRow(newcells, i+1))
     }
@@ -71,10 +71,10 @@ export function createTable(rowsCount = 15) {
     document.onselectstart=()=>{ // убирает выделение содержимого таблицы при ресайзе
       return false
     }
-    console.log(event.target, 'mouseDown') // {resize: "row"} если нажимаем на элемент с датой data-resize = 'row'
-const $resizer = $(event.target)
+  //  console.log(event.target, 'mouseDown') // {resize: "row"} если нажимаем на элемент с датой data-resize = 'row'
 if (event.target.dataset.resize ==='row') {
-    const $parent = $resizer.closest('[data-type="resize"]')
+  const $resizer = $(event.target)
+  const $parent = $resizer.closest('[data-type="resize"]')
     const coords = $parent.getCoords()
     const $parentInfo =$resizer.closest('[data-info="info"]')
     const $line = $.create('div', 'line-rowresize')
@@ -95,6 +95,7 @@ if (event.target.dataset.resize ==='row') {
     }
 }
 if (event.target.dataset.resize ==='col') {
+const $resizer = $(event.target)
 const $parent = $resizer.closest('[data-column="col"]')
 const coords = $parent.getCoords()
 const $line = $.create('div', 'line-resize')
@@ -120,4 +121,128 @@ document.onmouseup=()=>{
     console.log(document.onmousemove)
   }
 }
+}
+export function current(root, selection, curCol, curNum) {
+  if (curNum<=20 && curNum >=1 && curCol.charCodeAt(0) >=65 && curCol.charCodeAt(0)<=90) {
+  const el = root.find(`[data-name=${curCol}${curNum}]`)
+    selection.select(el)
+  } else {
+    return false
+  }
+}
+
+
+export function matrix(data, $root, selection) {
+  document.onmousemove = (e) =>{
+    if (!data.find((el)=>el==e.target)) {
+        data.push(e.target)
+        console.log('celll', e.target)
+        console.log('mass', data)
+    }
+     }
+     document.onmouseup =()=>{
+      console.log(data, 'DATA')
+      const startEl = data[0]
+      const startLetter = startEl.getAttribute('data-cell').charCodeAt(0)
+      const startNum = Number(startEl.getAttribute('data-num'))
+      const endEl = data[data.length-1]
+      const endLetter = endEl.getAttribute('data-cell').charCodeAt(0)
+      const endNum = Number(endEl.getAttribute('data-num'))
+      console.log(startEl, 'start', startNum, startLetter)
+      console.log(endEl, 'end', endNum, endLetter)
+      // const a = 'F'.charCodeAt(0)
+// const b = 'F'.charCodeAt(0)
+const arr = []
+if (startLetter>endLetter) {
+for (let i=endLetter; i<=startLetter; i++) {
+arr.push(String.fromCharCode(i))
+}
+} else if (startLetter<endLetter) {
+for (let i=startLetter; i<=endLetter; i++) {
+arr.push(String.fromCharCode(i))
+}
+} else if (startLetter==endLetter) {
+arr.push(String.fromCharCode(startLetter))
+}
+console.log(arr)
+const num = []
+if (startNum>endNum) {
+for (let i=endNum; i<=startNum; i++) {
+num.push(i)
+}
+} else if (startNum<endNum) {
+for (let i=startNum; i<=endNum; i++) {
+num.push(i)
+}
+} else if (startNum==endNum) {
+num.push(startNum)
+}
+console.log(num)
+// const els =[]
+/* arr.forEach((el)=>{
+num.forEach((elem)=>{
+els.push(this.$root.find(`[data-name =${el}${elem}]`))
+})
+})*/
+const els = arr.reduce((acc, coll)=>{
+num.forEach((elem)=>{
+acc.push($root.find(`[data-name =${coll}${elem}]`))
+})
+return acc
+}, [])
+
+selection.selectGroup(els)
+ document.onmousemove = null
+document.onmouseup = null
+
+console.log(els)
+
+
+        /* const mass ={}
+        data.forEach((el)=>{
+            const attr = el.getAttribute('data-cell')
+          if (!mass[attr]) {
+            mass[attr] = 1
+          } else {
+            mass[attr] =++ mass[attr]
+          }
+        })
+        const nums ={}
+        data.forEach((el)=>{
+          const attr = el.getAttribute('data-num')
+        if (!nums[attr]) {
+          nums[attr] = 1
+        } else {
+          nums[attr] =++ nums[attr]
+        }
+      })
+        console.log(mass)
+       const sort = Object.keys(mass).sort(function(a, b) {
+        return mass[a]-mass[b]
+       })
+       const sortnums = Object.keys(nums).sort(function(a, b) {
+        return nums[a]-nums[b]
+       })
+       console.log(sortnums, 'nums')
+        const filtCell = data.filter((el)=>el.dataset.cell == sort[sort.length-1]) // буквы уникальные
+        const numCell = filtCell.map((el)=> el.dataset.num) // номера строк конкртн столбца,где больше выбрано ячеек
+        const eventArr =[]
+        numCell.forEach((num)=>{
+          sort.forEach((b)=>{
+            eventArr.push(this.$root.find(`[data-name =${b}${num}]`))
+          })
+        })
+        sort.forEach((b)=>{
+          numCell.forEach((num)=>{
+            if (eventArr.find((el)=>el!=this.$root.find(`[data-name =${b}${num}]`))) {
+            eventArr.push(this.$root.find(`[data-name =${b}${num}]`))
+            }
+          })
+        })
+        console.log('aarrrrrrrrrrrr', eventArr)
+        // const objArr = eventArr.map((el)=>$(el))
+         this.selection.selectGroup(eventArr)
+        document.onmousemove = null
+        document.onmouseup = null */
+     }
 }
