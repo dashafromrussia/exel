@@ -13,6 +13,14 @@ if (typeof html === 'string') {
 }
 return this.$el.outHTML.trim()
  }
+
+ text(text) {
+if (typeof text === 'string') {
+    this.$el.textContent = text
+    return this
+}
+return this.$el.textContent.trim()
+ }
  // возвр this, чтобы можно было на нем вызвать метод clear..это назыв чейн
 // $('div').html('<h1>text</h1>').clear()
 get data() {
@@ -57,6 +65,18 @@ findAll(selector) { // делаем селектор не по всему док
     })
     return mass
 }
+selectorAll(selector) {
+    return this.$el.querySelectorAll(selector)
+}
+
+selectorAllinstans(selector) {
+    const data =[]
+    this.$el.querySelectorAll(selector).forEach((el)=> {
+        data.push($(el))
+    })
+    return data
+}
+
 css(styles={}) {
     Object.keys(styles).forEach((el)=>{
      this.$el.style[el] = styles[el]
@@ -64,7 +84,38 @@ css(styles={}) {
        return this
 }
 removeEl(data) {
+    console.log(data)
+    if (this.$el.contains(data.$el)) {
     this.$el.removeChild(data.$el)
+    }
+    return this
+}
+
+focus() {
+    this.$el.focus()
+    return this
+}
+
+find(selector) {
+    const el = this.$el.querySelector(selector)
+   return $(el)
+}
+removeAttr(data) {
+    this.$el.removeAttribute(data)
+    return this
+}
+getAttr(data) {
+    return this.$el.getAttribute(data)
+}
+setAttr(selector, val) {
+    this.$el.setAttribute(selector, val)
+    return this
+}
+addClass(name) {
+    this.$el.classList.add(name)
+}
+removeClass(name) {
+    this.$el.classList.remove(name)
 }
 }
 
